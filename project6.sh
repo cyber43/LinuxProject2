@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -i width=120                                                #set frame width
-declare -i length=25                                                #set frame length
+declare -i length=30                                                #set frame length
 declare -i px                                                       #set present x
 declare -i py                                                       #set present y
 declare -i ax=20                                                    #set addition for x
@@ -45,7 +45,7 @@ make_frame(){                                                       #print total
   tput cup $i 0
  
   print_equal                                                       
-  for ((i=`expr $length + 1` ; i<32 ; i++))                         #print 3rd left right frame
+  for ((i=`expr $length + 1` ; i<`expr $length + 7` ; i++))                         #print 3rd left right frame
   do
     echo "|"
     tput cup $i $width
@@ -57,7 +57,7 @@ make_frame(){                                                       #print total
 
   print_equal                                                       
   printf "|"                                                        #print 4th left right frame
-  tput cup 33 $width
+  tput cup `expr $i + 1` $width
   echo "|"
   print_equal
 }
@@ -68,29 +68,29 @@ print_4th_inform(){                                                 #print 4th i
   ps_num=`ls -lF | grep '|$' | wc -l`                               #present special file number
   pf_num=`expr $pt_num - $pd_num - $ps_num`                         #present file number
   pt_size=`du . | tail -n 1 | head -c 3`                            #present total size
-  tput cup 33 30
+  tput cup 38 30
   echo "$pt_num total   $pd_num directory   $pf_num file   $ps_num s-file   $pt_size total size"
 #  tput cup 31
 }
 
 print_1st_inform(){                                                 #print 1st information
   declare -i i=1
-  for up_file in `ls -1 ..*`                                        #upper directory files
+  for up_file in ../*                                        #upper directory files
   do
     tput cup $i 1
     if [ -d $up_file ]
     then
-      echo [34m"$up_file"                                        #]
+      echo [34m"$up_file" | cut -b -18                                        #]
     elif [ -f $up_file ]
     then
       if [ -x $up_file ]
       then
-        echo [31m"$up_file"                                        #]
+        echo [31m"$up_file" | cut -b -18                                       #]
       else
-        echo [33m"$up_file"                                      #]
+        echo [0m"$up_file" | cut -b -18                                     #]
       fi
     else
-      echo [0m "$up_file"                                         #]
+      echo [32m"$up_file" | cut -b -18                                         #]
     fi
     echo [0m""                                                    #]
     i=`expr $i + 1`
@@ -104,7 +104,7 @@ print_1st_inform(){                                                 #print 1st i
 
 print_3rd_inform(){                                                 #print 3rd information
   tput cup `expr $length + 1` 30
-  echo "`stat -c %n ${a_list[$I]}`"
+  echo "file name : `stat -c %n ${a_list[$I]}`"
   tput cup `expr $length + 2` 30
    if [ -d ${a_list[$I]} ]
      then
@@ -132,9 +132,9 @@ print_3rd_inform(){                                                 #print 3rd i
 }
 
 print_d_icon(){                                                     #print direcory icon / blue color
-  if [ -d $f_list ]
+  if [ -d ${a_list[$i+$scroll*5]} ]
   then
-    if [ "$f_list" = ".." ]
+    if [ "${a_list[$i+$scroll*5]}" = ".." ]
     then
       echo [31m'  -----'                                              #]
       tput cup `expr $py + 1` $px
@@ -144,7 +144,7 @@ print_d_icon(){                                                     #print direc
       tput cup `expr $py + 3` $px
       echo '-------'
       tput cup `expr $py + 4` $px
-      echo `stat -c %n $f_list`
+      echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
       echo -n [0m                                                     #]
     else
       echo [34m'  -----'                                              #]
@@ -155,7 +155,7 @@ print_d_icon(){                                                     #print direc
       tput cup `expr $py + 3` $px
       echo '-------'
       tput cup `expr $py + 4` $px
-      echo `stat -c %n $f_list`
+      echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
       echo -n [0m                                                     #]
     fi
   fi
@@ -170,7 +170,7 @@ print_o_icon(){
   tput cup `expr $py + 3` $px
   echo '-------'
   tput cup `expr $py + 4` $px
-  echo `stat -c %n $f_list`
+  echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
 }
 
 print_x_icon(){                                                     #print excutive file icon / yellow color
@@ -190,15 +190,15 @@ print_icon(){                                                       #print icon
   px=23                                                              
   py=1
 
-  for f_list in $p_f_list 
+  for ((i=0 ; i<25 ; i++))
   do
     tput cup $py $px                                                #adjust x, y
-    if [ -d $f_list ]                                               #if f_list is directory 
+    if [ -d ${a_list[$i+$scroll*5]} ]                                               #if f_list is directory 
     then
       print_d_icon
-    elif [ -f $f_list ]                                             #if f_list is file
+    elif [ -f ${a_list[$i+$scroll*5]} ]                                             #if f_list is file
     then
-      if [ -x $f_list ]                                             #if f_list is excutive file
+      if [ -x ${a_list[$i+$scroll*5]} ]                                             #if f_list is excutive file
       then
         print_x_icon
       else                                                          #if f_list is ordinary file
@@ -210,11 +210,20 @@ print_icon(){                                                       #print icon
     
     px=`expr $px + $ax`                                             #change x
 
-    if [ $px -ge `expr $width - 15` ]                               #if x over width
+    if [ $px -ge $width ]                                           #if x over width
     then
       px=23                                                         #reset x
       py=`expr $py + $ay`                                           #next icon line
+    elif [ $py -ge $length ]                                        #if y over length
+    then
+      break
     fi
+
+    if [ "${a_list[$i+$scroll*5]}" = "$NULL" ]                        #if file number < 25, don't print reaminder icon
+    then
+      break
+    fi
+
   done
 }
 
@@ -222,6 +231,7 @@ cursoring(){                                                        #impement cu
   cx=23                                                            #set cursor x, y
   cy=5
   kb_hit=0                                                          #key board hit 
+  declare -i scroll=0                                                          #scroll
   declare -i I=0                                                    #file index
   
   while [ 1 ]
@@ -231,7 +241,7 @@ cursoring(){                                                        #impement cu
     print_4th_inform
     print_icon
     print_3rd_inform
-
+    
     read -sn 1 kb_hit
     if [ $kb_hit = "A" ]                                            # hit up button
     then
@@ -256,22 +266,27 @@ cursoring(){                                                        #impement cu
       continue
     fi
 
-    if [ $cx -le 20 ]                                               #if cursor is out of frame
+    if [ $cx -le 20 ]                                               #if cursor is out of left line
     then
       cx=`expr $cx + $ax`
       I=`expr $I + 1`
-    elif [ $cx -ge $width ]
+    elif [ $cx -ge $width ]                                         #if cursor is out of right line
     then
       cx=`expr $cx - $ax`
       I=`expr $I - 1`
-    elif [ $cy -le 0 ]
+    elif [ $cy -le 0 ]                                              #if cursor is out of up line
     then
       cy=`expr $cy + $ay`
       I=`expr $I + 5`
-    elif [ $cy -ge 29 ]
+      if [ $scroll -ge 1 ]
+      then
+        scroll=$scroll - 1
+      fi
+    elif [ $cy -ge $length ]                                        #if cursor is out of down line
     then
       cy=`expr $cy - $ay`
       I=`expr $I - 5`
+      scroll=$scroll + 1
     fi
     
     tput cup $cy $cx
