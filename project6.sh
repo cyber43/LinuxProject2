@@ -148,6 +148,10 @@ print_d_icon(){                                                     #print direc
     if [ "${a_list[$i+$scroll*5]}" = ".." ]
     then
       tput setaf 1
+      if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                 #if selected
+      then
+        tput rev
+      fi
       echo '  -----'                                              
       tput cup `expr $py + 1` $px
       echo '--    -'
@@ -158,8 +162,16 @@ print_d_icon(){                                                     #print direc
       tput cup `expr $py + 4` $px
       echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
       tput setaf 7
+      if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                 #if selected
+      then
+        tput sgr0
+      fi
     else
       tput setaf 4 
+      if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                 #if selected
+      then
+        tput rev
+      fi
       echo '  -----'  
       tput cup `expr $py + 1` $px
       echo '--    -'
@@ -170,11 +182,19 @@ print_d_icon(){                                                     #print direc
       tput cup `expr $py + 4` $px
       echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
       tput setaf 7
+      if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                 #if selected
+      then
+        tput sgr0
+      fi
     fi
   fi
 }
 
 print_o_icon(){
+  if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                 #if selected
+  then
+    tput rev
+  fi
   echo '-------'
   tput cup `expr $py + 1` $px
   echo '-     -'
@@ -184,6 +204,10 @@ print_o_icon(){
   echo '-------'
   tput cup `expr $py + 4` $px
   echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
+  if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                 #if selected
+  then
+    tput sgr0
+  fi
 }
 
 print_x_icon(){                                                     #print excutive file icon / yellow color
