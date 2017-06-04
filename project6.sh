@@ -9,15 +9,17 @@ declare -i ay=6                                                     #set additio
 declare -i cx                                                       #declare cursor x
 declare -i cy                                                       #declare cursor y
 
-p_f_list=`ls -a | grep '\.\.'; ls -1F | grep '/$'; ls -1F | grep '*$'; ls -1F | grep -v '[/*|]$'`  #present file list < directory
-for AB in *
-do
-  if ! [ -d $AB ] && ! [ -f $AB ]
-  then
-    p_f_list="$p_f_list $AB"                                        #to deal with special file
-  fi
-done
-a_list=($p_f_list)
+set_base(){
+  p_f_list=`ls -a | grep '\.\.'; ls -1F | grep '/$'; ls -1F | grep '*$'; ls -1F | grep -v '[/*|]$'`  #present file list < directory
+  for AB in *
+  do
+    if ! [ -d $AB ] && ! [ -f $AB ]
+    then
+      p_f_list="$p_f_list $AB"                                        #to deal with special file
+    fi
+  done
+  a_list=($p_f_list)
+}
 
 print_equal(){                                                      #print =====...
   printf " "
@@ -264,6 +266,7 @@ print_icon(){                                                       #print icon
 }
 
 cursoring(){                                                        #impement cursor
+  set_base
   cx=23                                                            #set cursor x, y
   cy=5
   kb_hit=0                                                          #key board hit 
@@ -279,23 +282,33 @@ cursoring(){                                                        #impement cu
     print_3rd_inform
     
     read -sn 1 kb_hit
-    if [ $kb_hit = "A" ]                                            # hit up button
+    if [ "$kb_hit" = "A" ]                                            # hit up button
     then
       cy=`expr $cy - $ay`
       I=`expr $I - 5`
-    elif [ $kb_hit = "B" ]                                          # hit down button
+    elif [ "$kb_hit" = "B" ]                                          # hit down button
     then
       cy=`expr $cy + $ay`
       I=`expr $I + 5`
-    elif [ $kb_hit = "C" ]                                          # hit right button
+    elif [ "$kb_hit" = "C" ]                                          # hit right button
     then
       cx=`expr $cx + $ax`
       I=`expr $I + 1`
-    elif [ $kb_hit = "D" ]                                          # hit left button
+    elif [ "$kb_hit" = "D" ]                                          # hit left button
     then
       cx=`expr $cx - $ax`
       I=`expr $I - 1`
-    elif [ $kb_hit = "q" ]                                             #if hit q button, break
+    elif [ "$kb_hit" = "" ]                                           #hit space bar
+    then
+      if [ -d ${a_list[$I]} ]
+      then
+        cd `realpath -e ${a_list[$I]}`
+        cursoring
+      elif [ -x ${a_list[$I]} ]
+      then
+        ./${a_list[$I]}
+      fi
+    elif [ "$kb_hit" = "q" ]                                             #if hit q button, break
     then
       break
     else
