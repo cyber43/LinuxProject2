@@ -74,32 +74,43 @@ print_4th_inform(){                                                 #print 4th i
 }
 
 print_1st_inform(){                                                 #print 1st information
-  declare -i i=1
-  for up_file in ../*                                        #upper directory files
+  declare -i i=2
+  p_dir=`pwd`
+  cd ..
+  tput cup `expr $i - 1` 1
+  tput setaf 1
+  echo ".."
+  
+  for up_file in *                                             #upper directory files
   do
     tput cup $i 1
     if [ -d $up_file ]
     then
-      echo [34m"$up_file" | cut -b -18                                        #]
+      tput setaf 4
+      echo "$up_file" | cut -b -17                                        
     elif [ -f $up_file ]
     then
       if [ -x $up_file ]
       then
-        echo [31m"$up_file" | cut -b -18                                       #]
+        tput setaf 1
+        echo "$up_file" | cut -b -17                                       
       else
-        echo [0m"$up_file" | cut -b -18                                     #]
+        tput setaf 7
+        echo "$up_file" | cut -b -17                                    
       fi
     else
-      echo [32m"$up_file" | cut -b -18                                         #]
+      tput setaf 2
+      echo "$up_file" | cut -b -17                                         
     fi
-    echo [0m""                                                    #]
+    tput setaf 7
     i=`expr $i + 1`
     
-    if [ $i -eq 21 ]                                                #if over 20 line, break
+    if [ $i -eq 20 ]                                                #if over 20 line, break
     then
       break
     fi
   done
+  cd $p_dir
 }
 
 print_3rd_inform(){                                                 #print 3rd information
@@ -136,7 +147,8 @@ print_d_icon(){                                                     #print direc
   then
     if [ "${a_list[$i+$scroll*5]}" = ".." ]
     then
-      echo [31m'  -----'                                              #]
+      tput setaf 1
+      echo '  -----'                                              
       tput cup `expr $py + 1` $px
       echo '--    -'
       tput cup `expr $py + 2` $px
@@ -145,9 +157,10 @@ print_d_icon(){                                                     #print direc
       echo '-------'
       tput cup `expr $py + 4` $px
       echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
-      echo -n [0m                                                     #]
+      tput setaf 7
     else
-      echo [34m'  -----'                                              #]
+      tput setaf 4 
+      echo '  -----'  
       tput cup `expr $py + 1` $px
       echo '--    -'
       tput cup `expr $py + 2` $px
@@ -156,7 +169,7 @@ print_d_icon(){                                                     #print direc
       echo '-------'
       tput cup `expr $py + 4` $px
       echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
-      echo -n [0m                                                     #]
+      tput setaf 7
     fi
   fi
 }
@@ -174,24 +187,28 @@ print_o_icon(){
 }
 
 print_x_icon(){                                                     #print excutive file icon / yellow color
-  echo -n [31m                                                    #] 
+  tput setaf 1
   print_o_icon
-  echo -n [0m                                                     #]
+  tput setaf 7
 }
 
 print_s_icon(){                                                     #print special file icon / green color
-  echo -n [32m                                                    #] 
+  tput setaf 2
   print_o_icon
-  echo -n [0m                                                     #]
-  
+  tput setaf 7
 }
 
 print_icon(){                                                       #print icon
   px=23                                                              
   py=1
 
-  for ((i=0 ; i<25 ; i++))
+  for ((i=0 ; i<21 ; i++))
   do
+    if [ "${a_list[$i+$scroll*5]}" = "$NULL" ]                        #if file number < 25, don't print reaminder icon
+    then
+      break
+    fi
+    
     tput cup $py $px                                                #adjust x, y
     if [ -d ${a_list[$i+$scroll*5]} ]                                               #if f_list is directory 
     then
@@ -215,11 +232,6 @@ print_icon(){                                                       #print icon
       px=23                                                         #reset x
       py=`expr $py + $ay`                                           #next icon line
     elif [ $py -ge $length ]                                        #if y over length
-    then
-      break
-    fi
-
-    if [ "${a_list[$i+$scroll*5]}" = "$NULL" ]                        #if file number < 25, don't print reaminder icon
     then
       break
     fi
@@ -266,27 +278,27 @@ cursoring(){                                                        #impement cu
       continue
     fi
 
-    if [ $cx -le 20 ]                                               #if cursor is out of left line
+    if [ $cx -le 20 ]                                               #if cursor is out of 2nd frame's left line
     then
       cx=`expr $cx + $ax`
       I=`expr $I + 1`
-    elif [ $cx -ge $width ]                                         #if cursor is out of right line
+    elif [ $cx -ge $width ]                                         #if cursor is out of 2nd frame's right line
     then
       cx=`expr $cx - $ax`
       I=`expr $I - 1`
-    elif [ $cy -le 0 ]                                              #if cursor is out of up line
+    elif [ $cy -le 0 ]                                              #if cursor is out of 2nd frame's top line
     then
       cy=`expr $cy + $ay`
       I=`expr $I + 5`
       if [ $scroll -ge 1 ]
       then
-        scroll=$scroll - 1
+        scroll=`expr $scroll - 1`
       fi
-    elif [ $cy -ge $length ]                                        #if cursor is out of down line
+    elif [ $cy -ge $length ]                                        #if cursor is out of 2nd frame's bottom line
     then
       cy=`expr $cy - $ay`
       I=`expr $I - 5`
-      scroll=$scroll + 1
+      scroll=`expr $scroll + 1`
     fi
     
     tput cup $cy $cx
