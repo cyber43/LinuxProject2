@@ -8,6 +8,10 @@ declare -i ax=20                                                      #set addit
 declare -i ay=6                                                       #set addition for y
 declare -i cx                                                         #declare cursor x
 declare -i cy                                                         #declare cursor y
+  a_c=("$null" "$null" "$null" "$null")                               #array for copy
+  a_p_c=("$null" "$null" "$null" "$null")                             #array before path for copy
+  a_m=("$null" "$null" "$null" "$null")                               #array for move
+  a_p_m=("$null" "$null" "$null" "$null")                             #array before path for move
 
 set_base(){
   p_f_list=`ls -a | grep '\.\.'; ls -1F | grep '/$'; ls -1F | grep '*$'; ls -1F | grep -v '[/*|]$'`  #present file list < directory
@@ -19,10 +23,10 @@ set_base(){
     fi
   done
   a_list=($p_f_list)
-  a_c=("$null" "$null" "$null" "$null")                               #array for copy
-  a_p_c=("$null" "$null" "$null" "$null")                             #array before path for copy
-  a_m=("$null" "$null" "$null" "$null")                               #array for move
-  a_p_m=("$null" "$null" "$null" "$null")                             #array before path for move
+  #a_c=("$null" "$null" "$null" "$null")                               #array for copy
+  #a_p_c=("$null" "$null" "$null" "$null")                             #array before path for copy
+  #a_m=("$null" "$null" "$null" "$null")                               #array for move
+  #a_p_m=("$null" "$null" "$null" "$null")                             #array before path for move
 }
 
 print_equal(){                                                        #print =====...
@@ -232,7 +236,7 @@ print_icon(){                                                         #print ico
   px=23                                                              
   py=1
 
-  for ((i=0 ; i<21 ; i++))
+  for ((i=0 ; i<25 ; i++))
   do
     if [ "${a_list[$i+$scroll*5]}" = "$NULL" ]                        #if file number < 25, don't print reaminder icon
     then
@@ -269,6 +273,18 @@ print_icon(){                                                         #print ico
   done
 }
 
+copy(){
+  a_c[$ic]=`realpath -e ${a_list[$I]}`
+  if [ $ic -ge 3 ]
+  then
+    a_c[0]=${a_c[1]}
+    a_c[1]=${a_c[2]}
+    a_c[2]=${a_c[3]}
+    ic=3
+  fi
+  ic=$(( $ic + 1 ))
+}
+
 cursoring(){                                                          #impement cursor
   set_base
   cx=23                                                               #set cursor x, y
@@ -276,7 +292,7 @@ cursoring(){                                                          #impement 
   kb_hit=0                                                            #key board hit 
   declare -i scroll=0                                                 #scroll
   declare -i I=0                                                      #file index
-  
+  declare -i ic=0                                                     #index for copy
   while [ 1 ]
   do
     make_frame
@@ -313,6 +329,21 @@ cursoring(){                                                          #impement 
         clear
         ./${a_list[$I]}
       fi
+    elif [ "$kb_hit" = "c" ]
+    then
+      copy
+    elif [ "$kb_hit" = "p" ]
+    then
+      for((j=0; j<3; j++))
+      do
+        if [ "${a_c[$j]}" = "$NULL" ]
+	then
+	  break
+	fi
+        echo "${a_c[$j]} $PWD"
+        cp ${a_c[$j]} $PWD
+      done
+      read
     elif [ "$kb_hit" = "q" ]                                          #if hit q button, break
     then
       break
@@ -332,7 +363,7 @@ cursoring(){                                                          #impement 
     then
       cy=`expr $cy + $ay`
       I=`expr $I + 5`
-      if [ $scroll -ge 1 ]
+      if [ $scroll -ge 1 ]                                            
       then
         scroll=`expr $scroll - 1`
       fi
@@ -341,17 +372,9 @@ cursoring(){                                                          #impement 
       cy=`expr $cy - $ay`
       I=`expr $I - 5`
       scroll=`expr $scroll + 1`
-    fi
-    
-    tput cup $cy $cx
-
+    fi    
+    tput cup $cy $cx                                                  #set cursor next place
   done
-
 }
 
-
-#make_frame
-#print_1st_inform
-#print_4th_inform
-#print_icon
 cursoring
