@@ -71,7 +71,7 @@ print_4th_inform(){                                                   #print 4th
   pd_num=`ls -lF | grep '/$' | wc -l`                                 #present directory number
   ps_num=`ls -lF | grep '|$' | wc -l`                                 #present special file number
   pf_num=`expr $pt_num - $pd_num - $ps_num`                           #present file number
-  pt_size=`du . | tail -n 1 | head -c 3`                              #present total size
+  pt_size=`du -h . | tail -n 1 | head -c 4`                              #present total size
   tput cup 38 30
   echo "$pt_num total   $pd_num directory   $pf_num file   $ps_num s-file   $pt_size total size"
 #  tput cup 31
@@ -91,25 +91,25 @@ print_1st_inform(){                                                   #print 1st
     if [ -d $up_file ]
     then
       tput setaf 4
-      echo "$up_file" | cut -b -17                                        
+      echo "$up_file" | cut -b -10                                        
     elif [ -f $up_file ]
     then
       if [ -x $up_file ]
       then
         tput setaf 1
-        echo "$up_file" | cut -b -17                                       
+        echo "$up_file" | cut -b -10                                       
       else
         tput setaf 7
-        echo "$up_file" | cut -b -17                                    
+        echo "$up_file" | cut -b -10                                    
       fi
     else
       tput setaf 2
-      echo "$up_file" | cut -b -17                                         
+      echo "$up_file" | cut -b -10                                         
     fi
     tput setaf 7
     i=`expr $i + 1`
     
-    if [ $i -eq 20 ]                                                  #if over 20 line, break
+    if [ $i -eq 22 ]                                                  #if over 20 line, break
     then
       break
     fi
