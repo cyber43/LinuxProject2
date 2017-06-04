@@ -8,10 +8,8 @@ declare -i ax=20                                                      #set addit
 declare -i ay=6                                                       #set addition for y
 declare -i cx                                                         #declare cursor x
 declare -i cy                                                         #declare cursor y
-  a_c=("$null" "$null" "$null" "$null")                               #array for copy
-  a_p_c=("$null" "$null" "$null" "$null")                             #array before path for copy
-  a_m=("$null" "$null" "$null" "$null")                               #array for move
-  a_p_m=("$null" "$null" "$null" "$null")                             #array before path for move
+a_c=("$null" "$null" "$null" "$null")                                 #array for copy
+a_m=("$null" "$null" "$null" "$null")                                 #array for move
 
 set_base(){
   p_f_list=`ls -a | grep '\.\.'; ls -1F | grep '/$'; ls -1F | grep '*$'; ls -1F | grep -v '[/*|]$'`  #present file list < directory
@@ -23,10 +21,6 @@ set_base(){
     fi
   done
   a_list=($p_f_list)
-  #a_c=("$null" "$null" "$null" "$null")                               #array for copy
-  #a_p_c=("$null" "$null" "$null" "$null")                             #array before path for copy
-  #a_m=("$null" "$null" "$null" "$null")                               #array for move
-  #a_p_m=("$null" "$null" "$null" "$null")                             #array before path for move
 }
 
 print_equal(){                                                        #print =====...
@@ -273,7 +267,7 @@ print_icon(){                                                         #print ico
   done
 }
 
-copy(){
+copy(){                                                               #copy 
   a_c[$ic]=`realpath -e ${a_list[$I]}`
   if [ $ic -ge 3 ]
   then
@@ -285,6 +279,18 @@ copy(){
   ic=$(( $ic + 1 ))
 }
 
+move(){                                                               #move
+  a_m[$im]=`realpath -e ${a_list[$I]}`
+  if [ $im -ge 3 ]
+  then
+    a_m[0]=${a_m[1]}
+    a_m[1]=${a_m[2]}
+    a_m[2]=${a_m[3]}
+    im=3
+  fi
+  im=$(( $im + 1 ))
+}
+
 cursoring(){                                                          #impement cursor
   set_base
   cx=23                                                               #set cursor x, y
@@ -293,6 +299,7 @@ cursoring(){                                                          #impement 
   declare -i scroll=0                                                 #scroll
   declare -i I=0                                                      #file index
   declare -i ic=0                                                     #index for copy
+  declare -i im=0                                                     #index for move
   while [ 1 ]
   do
     make_frame
@@ -329,10 +336,10 @@ cursoring(){                                                          #impement 
         clear
         ./${a_list[$I]}
       fi
-    elif [ "$kb_hit" = "c" ]
+    elif [ "$kb_hit" = "c" ]                                          #if want to copy
     then
       copy
-    elif [ "$kb_hit" = "p" ]
+    elif [ "$kb_hit" = "p" ]                                          #if want to paste
     then
       for((j=0; j<3; j++))
       do
@@ -340,10 +347,21 @@ cursoring(){                                                          #impement 
 	then
 	  break
 	fi
-        echo "${a_c[$j]} $PWD"
         cp ${a_c[$j]} $PWD
       done
-      read
+    elif [ "$kb_hit" = "m" ]                                          #if want to move
+    then
+      move
+    elif [ "$kb_hit" = "v" ]                                          #if want to move
+    then
+      for((j=0; j<3; j++))
+      do
+        if [ "${a_m[$j]}" = "$NULL" ]
+	then
+	  break
+	fi
+        cp ${a_m[$j]} $PWD
+      done
     elif [ "$kb_hit" = "q" ]                                          #if hit q button, break
     then
       break
