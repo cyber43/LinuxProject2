@@ -121,20 +121,20 @@ print_3rd_inform(){                                                   #print 3rd
   tput cup `expr $length + 1` 30
   echo "file name : `stat -c %n ${a_list[$I]}`"
   tput cup `expr $length + 2` 30
-   if [ -d ${a_list[$I]} ]
-     then
-       echo -e [34m"file type : `stat -c %F ${a_list[$I]}`"         #]
-     elif [ -f ${a_list[$I]} ]
-     then
-       if [ -x ${a_list[$I]} ]
-       then
-         echo -e [31m"file type : `stat -c %F ${a_list[$I]}`"       #]
-       else
-         echo -e [0m"file type : `stat -c %F ${a_list[$I]}`"        #]
-       fi
-     else
-       echo -e [32m"file type : `stat -c %F ${a_list[$I]}`"         #]
-   fi
+  if [ -d ${a_list[$I]} ]
+  then
+    echo -e [34m"file type : `stat -c %F ${a_list[$I]}`"            #]
+  elif [ -f ${a_list[$I]} ]
+  then
+    if [ -x ${a_list[$I]} ]
+    then
+      echo -e [31m"file type : `stat -c %F ${a_list[$I]}`"          #]
+    else
+      echo -e [0m"file type : `stat -c %F ${a_list[$I]}`"           #]
+    fi
+  else
+    echo -e [32m"file type : `stat -c %F ${a_list[$I]}`"            #]
+  fi
   tput cup `expr $length + 3` 30
   echo -e [0m"file size : `stat -c %s ${a_list[$I]}`"               #]
   tput cup `expr $length + 4` 30
@@ -380,7 +380,7 @@ cursoring(){                                                          #impement 
     elif [ $cy -le 0 ]                                                #if cursor is out of 2nd frame's top line
     then
       cy=`expr $cy + $ay`
-      I=`expr $I + 5`
+      #I=`expr $I + 5`
       if [ $scroll -ge 1 ]                                            
       then
         scroll=`expr $scroll - 1`
@@ -388,7 +388,7 @@ cursoring(){                                                          #impement 
     elif [ $cy -ge $length ]                                          #if cursor is out of 2nd frame's bottom line
     then
       cy=`expr $cy - $ay`
-      I=`expr $I - 5`
+      #I=`expr $I - 5`
       scroll=`expr $scroll + 1`
     fi    
     tput cup $cy $cx                                                  #set cursor next place
