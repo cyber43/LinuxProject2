@@ -34,7 +34,6 @@ print_equal(){                                                        #print ===
  
 make_frame(){                                                         #print total frame
   clear                                                               #first, clear terminal
- 
   print_equal                                                       
   for ((i=0 ; i<$length ; i++))
   do
@@ -74,17 +73,15 @@ print_4th_inform(){                                                   #print 4th
   pt_size=`du -h . | tail -n 1 | head -c 4`                              #present total size
   tput cup 38 30
   echo "$pt_num total   $pd_num directory   $pf_num file   $ps_num s-file   $pt_size total size"
-#  tput cup 31
 }
 
 print_1st_inform(){                                                   #print 1st information
   declare -i i=2
-  p_dir=`pwd`
-  cd ..
+  p_dir=`pwd`                                                         #present directory path saving
+  cd ..                                                               #change upper directory
   tput cup `expr $i - 1` 1
   tput setaf 1
   echo ".."
-  
   for up_file in *                                                    #upper directory files
   do
     tput cup $i 1
@@ -114,7 +111,7 @@ print_1st_inform(){                                                   #print 1st
       break
     fi
   done
-  cd $p_dir
+  cd $p_dir                                                           #back to down directory
 }
 
 print_3rd_inform(){                                                   #print 3rd information
@@ -149,52 +146,45 @@ print_3rd_inform(){                                                   #print 3rd
 print_d_icon(){                                                       #print direcory icon / blue color
   if [ -d ${a_list[$i+$scroll*5]} ]
   then
-    if [ "${a_list[$i+$scroll*5]}" = ".." ]
+    if [ "${a_list[$i+$scroll*5]}" = ".." ]                           #if .. / red color
     then
       tput setaf 1
-      if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                   #if selected
-      then
-        tput rev
-      fi
-      echo '  -----'                                              
-      tput cup `expr $py + 1` $px
-      echo '--    -'
-      tput cup `expr $py + 2` $px
-      echo '-  D  -'
-      tput cup `expr $py + 3` $px
-      echo '-------'
-      tput cup `expr $py + 4` $px
-      echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
-      tput setaf 7
-      if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                   #if selected
-      then
-        tput sgr0
-      fi
-    else
-      tput setaf 4 
-      if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                   #if selected
-      then
-        tput rev
-      fi
-      echo '  -----'  
-      tput cup `expr $py + 1` $px
-      echo '--    -'
-      tput cup `expr $py + 2` $px
-      echo '-  D  -'
-      tput cup `expr $py + 3` $px
-      echo '-------'
-      tput cup `expr $py + 4` $px
-      echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
-      tput setaf 7
-      if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                   #if selected
-      then
-        tput sgr0
-      fi
+    else                                                              #if not .. / blue color
+      tput setaf 4
+    fi
+    if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                     #if selected
+    then
+      tput rev
+    fi
+    echo '  -----'                                              
+    tput cup `expr $py + 1` $px
+    echo '--    -'
+    tput cup `expr $py + 2` $px
+    echo '-  D  -'
+    tput cup `expr $py + 3` $px
+    echo '-------'
+    tput cup `expr $py + 4` $px
+    echo `stat -c %n ${a_list[$i+$scroll*5]}` | cut -b -10
+    tput setaf 7
+    if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                     #if selected
+    then
+      tput sgr0                                                       #reset
     fi
   fi
 }
 
-print_o_icon(){
+print_f_icon(){
+  if [ -f ${a_list[$i+$scroll*5]} ]
+  then
+    tput setaf 7
+    if [ -x ${a_list[$i+$scroll*5]} ]
+    then
+      tput setaf 1
+    fi
+  else
+    tput setaf 2
+  fi
+
   if [ `expr $py + 4` = $cy ] && [ $px == $cx ]                       #if selected
   then
     tput rev
@@ -214,18 +204,6 @@ print_o_icon(){
   fi
 }
 
-print_x_icon(){                                                       #print excutive file icon / yellow color
-  tput setaf 1
-  print_o_icon
-  tput setaf 7
-}
-
-print_s_icon(){                                                       #print special file icon / green color
-  tput setaf 2
-  print_o_icon
-  tput setaf 7
-}
-
 print_icon(){                                                         #print icon
   px=23                                                              
   py=1
@@ -236,25 +214,15 @@ print_icon(){                                                         #print ico
     then
       break
     fi
-    
     tput cup $py $px                                                  #adjust x, y
     if [ -d ${a_list[$i+$scroll*5]} ]                                 #if f_list is directory 
     then
       print_d_icon
-    elif [ -f ${a_list[$i+$scroll*5]} ]                               #if f_list is file
-    then
-      if [ -x ${a_list[$i+$scroll*5]} ]                               #if f_list is excutive file
-      then
-        print_x_icon
-      else                                                            #if f_list is ordinary file
-        print_o_icon
-      fi
     else
-      print_s_icon                                                    #if f_list is special file
+      print_f_icon                                                    #if f_list is not directory
     fi
     
     px=`expr $px + $ax`                                               #change x
-
     if [ $px -ge $width ]                                             #if x over width
     then
       px=23                                                           #reset x
@@ -263,8 +231,8 @@ print_icon(){                                                         #print ico
     then
       break
     fi
-
   done
+  tput sgr0
 }
 
 copy(){                                                               #copy 
@@ -309,6 +277,12 @@ cursoring(){                                                          #impement 
     print_3rd_inform
     
     read -sn 1 kb_hit
+    if [ "$kb_hit" = '' ]
+    then
+      read -sn 1 kb_hit
+      read -sn 1 kb_hit
+    fi
+
     if [ "$kb_hit" = "A" ]                                            # hit up button
     then
       cy=`expr $cy - $ay`
@@ -380,7 +354,6 @@ cursoring(){                                                          #impement 
     elif [ $cy -le 0 ]                                                #if cursor is out of 2nd frame's top line
     then
       cy=`expr $cy + $ay`
-      #I=`expr $I + 5`
       if [ $scroll -ge 1 ]                                            
       then
         scroll=`expr $scroll - 1`
@@ -388,7 +361,6 @@ cursoring(){                                                          #impement 
     elif [ $cy -ge $length ]                                          #if cursor is out of 2nd frame's bottom line
     then
       cy=`expr $cy - $ay`
-      #I=`expr $I - 5`
       scroll=`expr $scroll + 1`
     fi    
     tput cup $cy $cx                                                  #set cursor next place
