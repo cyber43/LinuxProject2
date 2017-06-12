@@ -334,7 +334,7 @@ cursoring(){                                                          #impement 
 	then
 	  break
 	fi
-        cp ${a_m[$j]} $PWD
+        mv ${a_m[$j]} $PWD
       done
     elif [ "$kb_hit" = "q" ]                                          #if hit q button, break
     then
