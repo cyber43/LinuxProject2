@@ -323,6 +323,7 @@ cursoring(){                                                          #impement 
 	fi
         cp ${a_c[$j]} $PWD
       done
+    a_c=("$null" "$null" "$null" "$null")                             #reset array for copy
     elif [ "$kb_hit" = "m" ]                                          #if want to move
     then
       move
@@ -336,6 +337,7 @@ cursoring(){                                                          #impement 
 	fi
         mv ${a_m[$j]} $PWD
       done
+    a_m=("$null" "$null" "$null" "$null")                             #reset array for move
     elif [ "$kb_hit" = "q" ]                                          #if hit q button, break
     then
       break
