@@ -10,6 +10,8 @@ declare -i cx                                                         #declare c
 declare -i cy                                                         #declare cursor y
 a_c=("$null" "$null" "$null" "$null")                                 #array for copy
 a_m=("$null" "$null" "$null" "$null")                                 #array for move
+declare -i ic=0                                                       #index for copy
+declare -i im=0                                                       #index for move
 
 set_base(){
   p_f_list=`ls -a | grep '\.\.'; ls -1F | grep '/$'; ls -1F | grep '*$'; ls -1F | grep -v '[/*|]$'`  #present file list < directory
@@ -236,7 +238,7 @@ print_icon(){                                                         #print ico
 }
 
 copy(){                                                               #copy 
-  a_c[$ic]=`realpath -e ${a_list[$I]}`
+  a_c[$ic]="$PWD/${a_list[$I]}"
   if [ $ic -ge 3 ]
   then
     a_c[0]=${a_c[1]}
@@ -248,7 +250,7 @@ copy(){                                                               #copy
 }
 
 move(){                                                               #move
-  a_m[$im]=`realpath -e ${a_list[$I]}`
+  a_m[$im]="$PWD/${a_list[$I]}"
   if [ $im -ge 3 ]
   then
     a_m[0]=${a_m[1]}
@@ -266,8 +268,6 @@ cursoring(){                                                          #impement 
   kb_hit=0                                                            #key board hit 
   declare -i scroll=0                                                 #scroll
   declare -i I=0                                                      #file index
-  declare -i ic=0                                                     #index for copy
-  declare -i im=0                                                     #index for move
   while [ 1 ]
   do
     make_frame
